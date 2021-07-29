@@ -1,0 +1,117 @@
+[
+	{
+		"BaseWallpaperURL": "https://five.sh/files/wallpapers/",
+		"Subsections": [
+			{
+				"Catagory": "Cityscapes",
+				"URLs": [
+					"Rooftops/", "Birds-eye%20view/", "Cities/",
+					"Bright%20sky,%20dark%20foreground/", "Roads/", "Rain/"
+                ]
+			},
+			{
+				"Catagory": "Creepy",
+				"URLs":     ["Aesthetic/", "Creepy/"]
+			},
+			{
+				"Catagory": "Ancient",
+				"URLs":     ["Ancient/"]
+			},
+			{
+				"Catagory": "Asia/Russia",
+				"URLs":     ["Russia/", "Asia/", "Asian/"]
+			},
+			{
+				"Catagory": "Blurry",
+				"URLs":     ["Blurry/"]
+			},
+			{
+				"Catagory": "Calm",
+				"URLs":     ["Calmness/", "Super%20Comfy/"]
+			},
+			{
+				"Catagory": "Cyberpunk",
+				"URLs":     ["Cyberpunk/"]
+			},
+			{
+				"Catagory": "Dark",
+				"URLs":     ["Dark/"]
+			},
+			{
+				"Catagory": "Dreamy",
+				"URLs":     ["Dreamy/"]
+			},
+			{
+				"Catagory": "Dystopian",
+				"URLs":     ["Dystopian/"]
+			},
+			{
+				"Catagory": "Fantasy",
+				"URLs":     ["Enormity/", "Fantasy/", "LOTR/"]
+			},
+			{
+				"Catagory": "Grainy",
+				"URLs":     ["Grainy/"]
+			},
+			{
+				"Catagory": "Nature",
+				"URLs":     ["Nature/", "Scenery/"]
+			},
+			{
+				"Catagory": "Purple",
+				"URLs":     ["Purple/"]
+			},
+			{
+				"Catagory": "Perspective",
+				"URLs":     ["Rotation/"]
+			},
+			{
+				"Catagory": "Snow",
+				"URLs":     ["Snow/"]
+			},
+			{
+				"Catagory": "Space",
+				"URLs":     ["Space/", "Space/Soviet/"]
+			},
+			{
+				"Catagory": "Synthwave",
+				"URLs":     ["Synthwave/"]
+			},
+			{
+				"Catagory": "Technology",
+				"URLs":     ["Technology/"]
+			},
+			{
+				"Catagory": "Triangular",
+				"URLs":     ["Triangular/"]
+			},
+			{
+				"Catagory": "VHS Box",
+				"URLs":     ["VHS%20Box/"]
+			},
+			{
+				"Catagory": "Games",
+				"URLs":     ["Games/", "The%20Witcher/"]
+			}
+        ],
+		"UncatagorizedPaths": ["Miscellaneous/", ""]
+	},
+	{
+		"BaseWallpaperURL": "https://v1r.eu/ac/drive2/Images/Wallpapers/",
+		"Subsections": [
+			{
+				"Catagory": "Nature",
+				"URLs":     ["Nature/", "Animals/", "Architecture/", "Cities/"]
+			},
+			{
+				"Catagory": "Cityscapes",
+				"URLs":     ["Roads/"]
+			},
+			{
+				"Catagory": "VHS Box",
+				"URLs": ["VHS%20Box%20Wallpapers/2400P/"]
+			}
+        ],
+		"UncatagorizedPaths": [""]
+	}
+]
