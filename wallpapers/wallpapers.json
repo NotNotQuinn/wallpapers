@@ -101,11 +101,11 @@
 		"Subsections": [
 			{
 				"Catagory": "Nature",
-				"URLs":     ["Nature/", "Animals/", "Architecture/", "Cities/"]
+				"URLs":     ["Nature/", "Animals/"]
 			},
 			{
 				"Catagory": "Cityscapes",
-				"URLs":     ["Roads/"]
+				"URLs":     ["Roads/", "Architecture/", "Cities/"]
 			},
 			{
 				"Catagory": "VHS Box",
