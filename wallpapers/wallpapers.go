@@ -1,6 +1,16 @@
 package wallpapers
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"math/rand"
+	"net/url"
+	"os"
+	"time"
+
+	"github.com/jlaffaye/ftp"
+)
 
 // A catagory a wallpaper can have
 type WallpaperCatagory string
@@ -62,7 +72,8 @@ var (
 //
 // If Include and Exclude have any overlap, the overlapping catagories are not included.
 // By default all catagories are included, however if `len(Include) > 0` then only the specified catagories are used.
-func NewURL(Exclude []WallpaperCatagory, Include []WallpaperCatagory) (string, error) {
+func NewURL(Exclude []WallpaperCatagory, Include []WallpaperCatagory) (string, WallpaperCatagory, error) {
+	// Caclulate accepted catagories
 	accept := ALL_CATAGORIES
 	if len(Include) > 0 {
 		accept = []WallpaperCatagory{}
@@ -75,8 +86,50 @@ func NewURL(Exclude []WallpaperCatagory, Include []WallpaperCatagory) (string, e
 			}
 		}
 	}
-	fmt.Println(accept)
-	return "", nil
+	// Caclulate # of things to stop after.
+	all_subsections := []WallpaperSubsection{}
+
+	for _, wr := range OnlineWallpapers {
+		all_subsections = append(all_subsections, wr.Subsections...)
+	}
+	fmt.Println(all_subsections)
+	stop_after := 0
+	if len(all_subsections) > 0 {
+		stop_after = rand.Intn(len(all_subsections) - 1)
+	}
+	// Pick a random catagory & pick a random corresponding URL
+	base := ""
+	append := ""
+	catagory := No_Catagory
+	for _, wp := range OnlineWallpapers {
+		base = wp.BaseWallpaperURL
+		for _, section := range wp.Subsections {
+			if len(section.URLs) > 0 {
+				append = section.URLs[rand.Intn(len(section.URLs))]
+			}
+			catagory = section.Catagory
+			stop_after--
+			if stop_after <= 0 {
+				break
+			}
+		}
+		if stop_after <= 0 {
+			break
+		}
+	}
+	directory_url := base + append
+	url, err := url.Parse(directory_url)
+	must(err)
+	fmt.Println(url.Path)
+	// List files in directory
+	conn, err := ftp.Dial(url.Host + ":443")
+	must(err)
+	entries, err := conn.List(url.Path)
+	must(err)
+	fmt.Println(entries)
+	// Pick one FILE (not subdirectory)
+	// Return
+	return "", catagory, nil
 }
 
 // Doesnt preserve order, but is very fast
@@ -84,4 +137,27 @@ func NewURL(Exclude []WallpaperCatagory, Include []WallpaperCatagory) (string, e
 func remove(s []WallpaperCatagory, i int) []WallpaperCatagory {
 	s[i] = s[len(s)-1]
 	return s[:len(s)-1]
+}
+
+func must(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
+func init() {
+	// Should be pretty random
+	rand.Seed(int64(time.Now().Local().Nanosecond() * time.Now().Day() * time.Now().Hour() * time.Now().Second()))
+	// do some random shit?
+	for _ = range make([]struct{}, 230) {
+		rand.ExpFloat64()
+		rand.Int63()
+	}
+	// Load OnlineWallpapers with data from ./wallpapers.json
+	f, err := os.Open("./wallpapers/wallpapers.json")
+	must(err)
+	bytes, err := io.ReadAll(f)
+	must(err)
+	err = json.Unmarshal(bytes, &OnlineWallpapers)
+	must(err)
 }

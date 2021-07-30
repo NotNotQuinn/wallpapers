@@ -20,7 +20,7 @@ func main() {
 				Description: "debug command",
 				Action: func(c *cli.Context) error {
 					cat := []wallpapers.WallpaperCatagory{wallpapers.AsiaRussia}
-					_, err := wallpapers.NewURL(cat, cat)
+					_, _, err := wallpapers.NewURL(cat, cat)
 					return err
 				},
 			},
