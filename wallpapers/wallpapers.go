@@ -8,8 +8,6 @@ import (
 	"net/url"
 	"os"
 	"time"
-
-	"github.com/jlaffaye/ftp"
 )
 
 // A catagory a wallpaper can have
@@ -92,7 +90,6 @@ func NewURL(Exclude []WallpaperCatagory, Include []WallpaperCatagory) (string, W
 	for _, wr := range OnlineWallpapers {
 		all_subsections = append(all_subsections, wr.Subsections...)
 	}
-	fmt.Println(all_subsections)
 	stop_after := 0
 	if len(all_subsections) > 0 {
 		stop_after = rand.Intn(len(all_subsections) - 1)
@@ -120,13 +117,9 @@ func NewURL(Exclude []WallpaperCatagory, Include []WallpaperCatagory) (string, W
 	directory_url := base + append
 	url, err := url.Parse(directory_url)
 	must(err)
-	fmt.Println(url.Path)
+	fmt.Printf("catagory: %v\n", catagory)
+	fmt.Printf("url: %v\n", url)
 	// List files in directory
-	conn, err := ftp.Dial(url.Host + ":443")
-	must(err)
-	entries, err := conn.List(url.Path)
-	must(err)
-	fmt.Println(entries)
 	// Pick one FILE (not subdirectory)
 	// Return
 	return "", catagory, nil
@@ -149,7 +142,7 @@ func init() {
 	// Should be pretty random
 	rand.Seed(int64(time.Now().Local().Nanosecond() * time.Now().Day() * time.Now().Hour() * time.Now().Second()))
 	// do some random shit?
-	for _ = range make([]struct{}, 230) {
+	for range make([]struct{}, 230) {
 		rand.ExpFloat64()
 		rand.Int63()
 	}
@@ -158,6 +151,5 @@ func init() {
 	must(err)
 	bytes, err := io.ReadAll(f)
 	must(err)
-	err = json.Unmarshal(bytes, &OnlineWallpapers)
-	must(err)
+	must(json.Unmarshal(bytes, &OnlineWallpapers))
 }
