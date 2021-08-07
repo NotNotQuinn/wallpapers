@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"math/rand"
-	"net/url"
 	"os"
 	"time"
 )
@@ -25,9 +24,15 @@ type WallpaperRepo struct {
 	Subsections []WallpaperSubsection `json:"Subsections"`
 	// Strings that can be appended to the base URL for access to uncatagorized sections.
 	UncatagorizedPaths []string `json:"UncatagorizedPaths"`
+	// The type of wallpaper repo
+	Type WallpaperRepoType `json:"type"`
 }
 
+type WallpaperRepoType string
+
 const (
+	Eyy_Indexer WallpaperRepoType = "eyy-indexer"
+
 	// There is no catagory
 	No_Catagory WallpaperCatagory = "NO CATAGORY"
 	// May also include subcatagory "Roads" - could be moved to seperate
@@ -97,8 +102,10 @@ func NewURL(Exclude []WallpaperCatagory, Include []WallpaperCatagory) (string, W
 	// Pick a random catagory & pick a random corresponding URL
 	base := ""
 	append := ""
+	var repoType WallpaperRepoType
 	catagory := No_Catagory
 	for _, wp := range OnlineWallpapers {
+		repoType = wp.Type
 		base = wp.BaseWallpaperURL
 		for _, section := range wp.Subsections {
 			if len(section.URLs) > 0 {
@@ -115,11 +122,12 @@ func NewURL(Exclude []WallpaperCatagory, Include []WallpaperCatagory) (string, W
 		}
 	}
 	directory_url := base + append
-	url, err := url.Parse(directory_url)
-	must(err)
 	fmt.Printf("catagory: %v\n", catagory)
-	fmt.Printf("url: %v\n", url)
+	fmt.Printf("url: %v\n", directory_url)
 	// List files in directory
+	urls, err := GetFiles(repoType, directory_url)
+	must(err)
+	fmt.Printf("urls: %v\n", urls)
 	// Pick one FILE (not subdirectory)
 	// Return
 	return "", catagory, nil
