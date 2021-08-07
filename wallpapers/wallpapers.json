@@ -94,7 +94,8 @@
 				"URLs":     ["Games/", "The%20Witcher/"]
 			}
         ],
-		"UncatagorizedPaths": ["Miscellaneous/", ""]
+		"UncatagorizedPaths": ["Miscellaneous/", ""],
+		"type": "eyy-indexer"
 	},
 	{
 		"BaseWallpaperURL": "https://v1r.eu/ac/drive2/Images/Wallpapers/",
@@ -112,6 +113,7 @@
 				"URLs": ["VHS%20Box%20Wallpapers/2400P/"]
 			}
         ],
-		"UncatagorizedPaths": [""]
+		"UncatagorizedPaths": [""],
+		"type": "eyy-indexer"
 	}
 ]
