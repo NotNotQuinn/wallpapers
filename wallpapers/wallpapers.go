@@ -2,9 +2,8 @@ package wallpapers
 
 import (
 	"encoding/json"
-	"io"
+	"io/ioutil"
 	"math/rand"
-	"os"
 	"time"
 )
 
@@ -144,16 +143,14 @@ func must(err error) {
 
 func init() {
 	// Should be pretty random
-	rand.Seed(int64(time.Now().Local().Nanosecond() * time.Now().Day() * time.Now().Hour() * time.Now().Second()))
+	rand.Seed(int64(time.Now().Local().Hour()*time.Now().Nanosecond() + time.Now().Day()*time.Now().Hour() + time.Now().Second()))
 	// do some random shit?
 	for range make([]struct{}, 230) {
 		rand.ExpFloat64()
 		rand.Int63()
 	}
 	// Load OnlineWallpapers with data from ./wallpapers.json
-	f, err := os.Open("./wallpapers/wallpapers.json")
-	must(err)
-	bytes, err := io.ReadAll(f)
+	bytes, err := ioutil.ReadFile("./wallpapers/wallpapers.json")
 	must(err)
 	must(json.Unmarshal(bytes, &OnlineWallpapers))
 }
