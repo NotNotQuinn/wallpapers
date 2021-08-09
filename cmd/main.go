@@ -4,6 +4,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/notnotquinn/wallpapers/conf"
 	"github.com/notnotquinn/wallpapers/wallpapers"
 	wp "github.com/reujab/wallpaper"
 	"github.com/urfave/cli/v2"
@@ -14,10 +15,26 @@ func main() {
 		Name:                   "Wallpaper Updater",
 		Version:                "0.0.1-dev",
 		UseShortOptionHandling: true,
+		Copyright:              "(c) MIT",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				// config file
+				Name:        "config",
+				Aliases:     []string{"c"},
+				DefaultText: "./config.json",
+			},
+		},
+		Authors: []*cli.Author{{
+			// If submitting a PR add
+			Name:  "Quinn T",
+			Email: "quinn.github@gmail.com",
+		}},
+		Before: func(c *cli.Context) error {
+			return conf.Load(c.String("config"))
+		},
 		Commands: []*cli.Command{
 			{
 				Name:        "debug",
-				Aliases:     []string{"d"},
 				Description: "debug command",
 				Action: func(c *cli.Context) error {
 					for range make([]struct{}, 4) {
@@ -51,12 +68,16 @@ func main() {
 	//   Seems like way too much work, could be easier to just set one in watch mode
 	//   on the config, that way the CLI can edit the config file and the other will
 	//   pick up on that and change accordingly.
-
 	err := app.Run(os.Args)
+	must(err)
+}
+
+func must(err error) {
 	if err != nil {
 		panic(err)
 	}
 }
+
 func init() {
 	err := wp.SetMode(wp.Fit)
 	if err != nil {
