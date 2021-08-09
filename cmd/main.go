@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"time"
 
 	"github.com/notnotquinn/wallpapers/wallpapers"
 	wp "github.com/reujab/wallpaper"
@@ -19,9 +20,19 @@ func main() {
 				Aliases:     []string{"d"},
 				Description: "debug command",
 				Action: func(c *cli.Context) error {
-					cat := []wallpapers.WallpaperCatagory{wallpapers.AsiaRussia}
-					_, _, err := wallpapers.NewURL(cat, cat)
-					return err
+					for range make([]struct{}, 4) {
+						cat := []wallpapers.WallpaperCatagory{wallpapers.AsiaRussia}
+						link, _, err := wallpapers.NewURL(cat, cat)
+						if err != nil {
+							return err
+						}
+						err = wp.SetFromURL(link)
+						if err != nil {
+							return err
+						}
+						time.Sleep(time.Second * 5)
+					}
+					return nil
 				},
 			},
 		},
