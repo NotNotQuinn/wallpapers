@@ -1,0 +1,10 @@
+version: "3.9"
+
+services:
+  cloudproxy:
+    container_name: cloudproxy
+    # Custom build of cloudproxy with updated dependancies and thats about it.
+    image: quinndt/cloudproxy:commit-8890bb8f42bb1d989920133ece3c619bc6cbb100
+    restart: always
+    ports:
+      - 8191:8191
