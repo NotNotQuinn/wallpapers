@@ -1,11 +1,11 @@
 package wallpapers
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
 )
 
 // Solution to a cloudproxy request
@@ -53,36 +53,66 @@ type CloudProxyCookie struct {
 // Cookies created in cloudproxy sessions
 var CloudProxyCookies []CloudProxyCookie
 
+// Adds cookies to the cookie cache, but only ones that arent already there.
+func addCookies(cookies []CloudProxyCookie) {
+	for _, cookie := range CloudProxyCookies {
+		for i, newCookie := range cookies {
+			if cookie == newCookie {
+				// remove matching cookie
+				cookies[i] = cookies[len(cookies)-1]
+				cookies = cookies[:len(cookies)-1]
+			}
+		}
+	}
+	CloudProxyCookies = append(CloudProxyCookies, cookies...)
+}
+
 // Uses cloudproxy (if availible on local port 8191) to get the content of a website.
 // Does not solve captchas, only bypasses CloudFlare IUAM.
 //
 // CloudProxy: https://github.com/NoahCardoza/CloudProxy
 func CloudProxyGetContent(Url string) (content *CloudProxyResponse, err error) {
-	req, err := http.NewRequest("POST", "http://localhost:8191/v1",
-		strings.NewReader(fmt.Sprintf(`{
-			"cmd": "request.get",
-			"url":"%s",
-			"userAgent": "%s",
-			"maxTimeout": 20000
-		  }`, Url, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36"),
-		))
+	requestJSON, err := json.Marshal(struct {
+		Cmd        string             `json:"cmd"`
+		Url        string             `json:"url"`
+		UserAgent  string             `json:"userAgent"`
+		MaxTimeout int                `json:"maxTimeout"`
+		Cookies    []CloudProxyCookie `json:"cookies"`
+	}{
+		"request.get",
+		Url,
+		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36",
+		20000,
+		CloudProxyCookies,
+	})
 	if err != nil {
 		return nil, err
 	}
+
+	req, err := http.NewRequest("POST", "http://localhost:8191/v1", bytes.NewReader(requestJSON))
+	if err != nil {
+		return nil, err
+	}
+
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
+
 	bytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
+
 	err = json.Unmarshal(bytes, &content)
 	if err != nil {
 		return nil, err
 	}
+
 	if content.Status != "ok" {
 		return nil, fmt.Errorf("cloudproxy: %s", content.Message)
 	}
+
+	addCookies(content.Solution.Cookies)
 	return content, nil
 }
