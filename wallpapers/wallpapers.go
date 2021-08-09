@@ -2,7 +2,6 @@ package wallpapers
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"math/rand"
 	"os"
@@ -56,9 +55,8 @@ const (
 	Synthwave   WallpaperCatagory = "Synthwave"
 	Technology  WallpaperCatagory = "Technology"
 	Triangular  WallpaperCatagory = "Triangular"
-	// VHS Box art
-	VHS_Box WallpaperCatagory = "VHS Box"
-	Games   WallpaperCatagory = "Games"
+	VHS_Box_Art WallpaperCatagory = "VHS Box"
+	Games       WallpaperCatagory = "Games"
 )
 
 var (
@@ -66,7 +64,7 @@ var (
 		Ancient, AsiaRussia, Blurry, Calm, Cityscapes, Creepy,
 		Cyberpunk, Dark, Dreamy, Dystopian, Fantasy, Games, Grainy,
 		Nature, No_Catagory, Perspective, Purple, Snow, Space,
-		Synthwave, Technology, Triangular, VHS_Box,
+		Synthwave, Technology, Triangular, VHS_Box_Art,
 	}
 	OnlineWallpapers []WallpaperRepo
 )
@@ -122,15 +120,13 @@ func NewURL(Exclude []WallpaperCatagory, Include []WallpaperCatagory) (string, W
 		}
 	}
 	directory_url := base + append
-	fmt.Printf("catagory: %v\n", catagory)
-	fmt.Printf("url: %v\n", directory_url)
 	// List files in directory
 	urls, err := GetFiles(repoType, directory_url)
-	must(err)
-	fmt.Printf("urls: %v\n", urls)
-	// Pick one FILE (not subdirectory)
-	// Return
-	return "", catagory, nil
+	if err != nil {
+		return "", "", nil
+	}
+	out := urls[rand.Intn(len(urls))]
+	return out, catagory, nil
 }
 
 // Doesnt preserve order, but is very fast
