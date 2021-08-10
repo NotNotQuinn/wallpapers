@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/notnotquinn/wallpapers/conf"
 	"github.com/notnotquinn/wallpapers/wallpapers"
@@ -11,46 +12,45 @@ import (
 )
 
 func main() {
-	app := cli.App{
-		Name:                   "Wallpaper Updater",
-		Version:                "0.0.1-dev",
-		UseShortOptionHandling: true,
-		Usage:                  "Randomize your wallpapers",
-		Copyright:              "(c) MIT",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:        "config",
-				Aliases:     []string{"c"},
-				TakesFile:   true,
-				Value:       "./wallpaperconf.json",
-				DefaultText: "./wallpaperconf.json",
-				Usage:       "config file",
-			},
+	loadConfig := func(c *cli.Context) error {
+		err := conf.SetPath(c.Path("config"))
+		if err != nil && strings.HasSuffix(err.Error(), ": The system cannot find the file specified.") {
+			fmt.Println("This subcommand requires flag \"config\" to be set.")
+			os.Exit(1)
+		}
+		return err
+	}
+
+	app := cli.NewApp()
+	app.Name = "Wallpaper Updater"
+	app.Version = "0.0.1-dev"
+	app.Usage = "Randomize your wallpapers"
+	app.Description = `Randomly set your wallpaper background.`
+	app.Copyright = "(c) MIT"
+	app.Flags = []cli.Flag{
+		&cli.PathFlag{
+			Name:        "config",
+			Aliases:     []string{"c"},
+			DefaultText: conf.DefaultPath,
+			Usage:       "config file",
 		},
-		Authors: []*cli.Author{{
-			Name:  "Quinn T",
-			Email: "quinn.github@gmail.com",
-		}},
-		Before: func(c *cli.Context) error {
-			if c.IsSet("config") {
-				err := conf.Load(c.String("config"))
-				if err != nil {
-					fmt.Printf("Unable to load config in '%s'\nTo set the path use the -c flag.\n", c.String("config"))
-					os.Exit(1)
-				}
-			}
-			return nil
-		},
-		Commands: []*cli.Command{
-			{
-				Name:  "random",
-				Usage: "Changes the wallpaper to a random one",
-				Action: func(c *cli.Context) error {
-					return wallpapers.ChangeToRandom()
-				},
+	}
+	app.Authors = []*cli.Author{{
+		Name:  "Quinn T",
+		Email: "quinn.github@gmail.com",
+	}}
+	app.Commands = []*cli.Command{
+		{
+			Name:      "random",
+			UsageText: "wallpaper --config /path/to/config.json random",
+			Usage:     "Changes the wallpaper to a random one",
+			Before:    loadConfig,
+			Action: func(c *cli.Context) error {
+				return wallpapers.ChangeToRandom()
 			},
 		},
 	}
+	app.UseShortOptionHandling = true
 
 	// Some things that need to get done:
 	// - SET WALLPAPERS EVERY SO OFTEN AND GET THEM FROM THE INTERNET

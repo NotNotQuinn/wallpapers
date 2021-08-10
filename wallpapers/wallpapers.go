@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/notnotquinn/wallpapers/conf"
 	wp "github.com/reujab/wallpaper"
 )
 
@@ -68,7 +69,8 @@ var (
 		Nature, No_Catagory, Perspective, Purple, Snow, Space,
 		Synthwave, Technology, Triangular, VHS_Box_Art,
 	}
-	OnlineWallpapers []WallpaperRepo
+	OnlineWallpapers     []WallpaperRepo
+	WallpaperDataIsValid = make(chan struct{})
 )
 
 // Returns a semi-random URL to a new wallpaper. Error if none can be found.
@@ -92,6 +94,7 @@ func NewURL(Exclude []WallpaperCatagory, Include []WallpaperCatagory) (string, W
 	// Caclulate # of things to stop after.
 	all_subsections := []WallpaperSubsection{}
 
+	<-WallpaperDataIsValid
 	for _, wr := range OnlineWallpapers {
 		all_subsections = append(all_subsections, wr.Subsections...)
 	}
@@ -157,13 +160,13 @@ func must(err error) {
 func init() {
 	// Should be pretty random
 	rand.Seed(int64(time.Now().Local().Hour()*time.Now().Nanosecond() + time.Now().Day()*time.Now().Hour() + time.Now().Second()))
-	// do some random shit?
-	for range make([]struct{}, 230) {
-		rand.ExpFloat64()
-		rand.Int63()
-	}
-	// Load OnlineWallpapers with data from ./wallpapers.json
-	bytes, err := ioutil.ReadFile("./wallpapers/wallpapers.json")
-	must(err)
-	must(json.Unmarshal(bytes, &OnlineWallpapers))
+	go func() {
+		<-conf.FirstLoad()
+		// Load OnlineWallpapers with data from wallpaper data directory.
+		bytes, err := ioutil.ReadFile(conf.Get().WallpaperData)
+		must(err)
+		must(json.Unmarshal(bytes, &OnlineWallpapers))
+		// Wallpaper data is now loaded.
+		close(WallpaperDataIsValid)
+	}()
 }
