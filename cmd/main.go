@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -15,6 +16,7 @@ func main() {
 		Name:                   "Wallpaper Updater",
 		Version:                "0.0.1-dev",
 		UseShortOptionHandling: true,
+		Usage:                  "Randomize your wallpapers",
 		Copyright:              "(c) MIT",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
@@ -22,22 +24,30 @@ func main() {
 				Name:        "config",
 				Aliases:     []string{"c"},
 				DefaultText: "./config.json",
+				TakesFile:   true,
+				Usage:       "config file",
 			},
 		},
 		Authors: []*cli.Author{{
-			// If submitting a PR add
 			Name:  "Quinn T",
 			Email: "quinn.github@gmail.com",
 		}},
 		Before: func(c *cli.Context) error {
-			return conf.Load(c.String("config"))
+			if c.IsSet("config") {
+				err := conf.Load(c.String("config"))
+				if err != nil {
+					return fmt.Errorf("config not loaded: %w", err)
+				}
+			}
+			return nil
 		},
 		Commands: []*cli.Command{
 			{
-				Name:        "debug",
-				Description: "debug command",
+				Name:  "debug",
+				Usage: "Debug command for private use",
 				Action: func(c *cli.Context) error {
 					for range make([]struct{}, 4) {
+						fmt.Println(conf.Conf)
 						cat := []wallpapers.WallpaperCatagory{wallpapers.AsiaRussia}
 						link, _, err := wallpapers.NewURL(cat, cat)
 						if err != nil {
