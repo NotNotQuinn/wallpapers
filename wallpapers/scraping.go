@@ -28,12 +28,12 @@ func getEyyIndexerFiles(Url string) (urls []string, err error) {
 		return nil, err
 	}
 
-	parsed, err := url.Parse(content.Solution.URL)
+	parsed, err := url.Parse(Url)
 	if err != nil {
 		return nil, err
 	}
 
-	matches := findFiles.FindAllStringSubmatch(content.Solution.Response, -1)
+	matches := findFiles.FindAllStringSubmatch(content, -1)
 	baseURL := "https://" + parsed.Host
 	for _, match := range matches {
 		urls = append(urls, baseURL+match[1])

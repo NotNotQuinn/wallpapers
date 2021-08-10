@@ -2,6 +2,7 @@ package wallpapers
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"math/rand"
 	"time"
@@ -68,7 +69,7 @@ var (
 	OnlineWallpapers []WallpaperRepo
 )
 
-// Returns a semi-random URL to a new wallpaper.
+// Returns a semi-random URL to a new wallpaper. Error if none can be found.
 //
 // If Include and Exclude have any overlap, the overlapping catagories are not included.
 // By default all catagories are included, however if `len(Include) > 0` then only the specified catagories are used.
@@ -122,10 +123,12 @@ func NewURL(Exclude []WallpaperCatagory, Include []WallpaperCatagory) (string, W
 	// List files in directory
 	urls, err := GetFiles(repoType, directory_url)
 	if err != nil {
-		return "", "", nil
+		return "", No_Catagory, err
 	}
-	out := urls[rand.Intn(len(urls))]
-	return out, catagory, nil
+	if len(urls) <= 0 {
+		return "", No_Catagory, errors.New("could not fetch any url")
+	}
+	return urls[rand.Intn(len(urls))], catagory, nil
 }
 
 // Doesnt preserve order, but is very fast

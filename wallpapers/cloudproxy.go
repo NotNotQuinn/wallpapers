@@ -71,7 +71,7 @@ func addCookies(cookies []CloudProxyCookie) {
 // Does not solve captchas, only bypasses CloudFlare IUAM.
 //
 // CloudProxy: https://github.com/NoahCardoza/CloudProxy
-func CloudProxyGetContent(Url string) (content *CloudProxyResponse, err error) {
+func CloudProxyGetContent(Url string) (response string, err error) {
 	requestJSON, err := json.Marshal(struct {
 		Cmd        string             `json:"cmd"`
 		Url        string             `json:"url"`
@@ -86,33 +86,44 @@ func CloudProxyGetContent(Url string) (content *CloudProxyResponse, err error) {
 		CloudProxyCookies,
 	})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	req, err := http.NewRequest("POST", "http://localhost:8191/v1", bytes.NewReader(requestJSON))
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
+	var cloudproxy bool = true
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, err
+		// Likely that cloudproxy is not running, and we couldnt connect.
+		// Try a direct GET
+		resp, err = http.Get(Url)
+		if err != nil {
+			return "", err
+		}
+		cloudproxy = false
 	}
 
 	bytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return "", err
+	}
+	if !cloudproxy {
+		return string(bytes), nil
 	}
 
+	var content *CloudProxyResponse
 	err = json.Unmarshal(bytes, &content)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	if content.Status != "ok" {
-		return nil, fmt.Errorf("cloudproxy: %s", content.Message)
+		return "", fmt.Errorf("cloudproxy: %s", content.Message)
 	}
 
 	addCookies(content.Solution.Cookies)
-	return content, nil
+	return content.Solution.Response, nil
 }
