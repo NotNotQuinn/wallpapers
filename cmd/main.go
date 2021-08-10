@@ -23,10 +23,8 @@ func main() {
 
 	app := cli.NewApp()
 	app.Name = "Wallpaper Updater"
-	app.Version = "0.0.1-dev"
+	app.Version = "0.1.0-dev"
 	app.Usage = "Randomize your wallpapers"
-	app.Description = `Randomly set your wallpaper background.`
-	app.Copyright = "(c) MIT"
 	app.Flags = []cli.Flag{
 		&cli.PathFlag{
 			Name:        "config",
@@ -35,10 +33,6 @@ func main() {
 			Usage:       "config file",
 		},
 	}
-	app.Authors = []*cli.Author{{
-		Name:  "Quinn T",
-		Email: "quinn.github@gmail.com",
-	}}
 	app.Commands = []*cli.Command{
 		{
 			Name:      "random",
