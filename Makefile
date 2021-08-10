@@ -10,4 +10,4 @@ endif
 cli:
 	go build -o $(CLI_BIN) ./cmd
 debug: cli 
-	$(CLI_BIN) -c ./conf/config.json debug
+	$(CLI_BIN) -c ./conf/config.json random

@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/notnotquinn/wallpapers/conf"
 	"github.com/notnotquinn/wallpapers/wallpapers"
@@ -20,11 +19,11 @@ func main() {
 		Copyright:              "(c) MIT",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				// config file
 				Name:        "config",
 				Aliases:     []string{"c"},
-				DefaultText: "./config.json",
 				TakesFile:   true,
+				Value:       "./wallpaperconf.json",
+				DefaultText: "./wallpaperconf.json",
 				Usage:       "config file",
 			},
 		},
@@ -36,30 +35,18 @@ func main() {
 			if c.IsSet("config") {
 				err := conf.Load(c.String("config"))
 				if err != nil {
-					return fmt.Errorf("config not loaded: %w", err)
+					fmt.Printf("Unable to load config in '%s'\nTo set the path use the -c flag.\n", c.String("config"))
+					os.Exit(1)
 				}
 			}
 			return nil
 		},
 		Commands: []*cli.Command{
 			{
-				Name:  "debug",
-				Usage: "Debug command for private use",
+				Name:  "random",
+				Usage: "Changes the wallpaper to a random one",
 				Action: func(c *cli.Context) error {
-					for range make([]struct{}, 4) {
-						fmt.Println(conf.Conf)
-						cat := []wallpapers.WallpaperCatagory{wallpapers.AsiaRussia}
-						link, _, err := wallpapers.NewURL(cat, cat)
-						if err != nil {
-							return err
-						}
-						err = wp.SetFromURL(link)
-						if err != nil {
-							return err
-						}
-						time.Sleep(time.Second * 5)
-					}
-					return nil
+					return wallpapers.ChangeToRandom()
 				},
 			},
 		},
@@ -89,8 +76,6 @@ func must(err error) {
 }
 
 func init() {
-	err := wp.SetMode(wp.Fit)
-	if err != nil {
-		panic(err)
-	}
+	// "zooms" into the images until they fill the screen
+	must(wp.SetMode(wp.Crop))
 }

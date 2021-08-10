@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"time"
+
+	wp "github.com/reujab/wallpaper"
 )
 
 // A catagory a wallpaper can have
@@ -129,6 +131,14 @@ func NewURL(Exclude []WallpaperCatagory, Include []WallpaperCatagory) (string, W
 		return "", No_Catagory, errors.New("could not fetch any url")
 	}
 	return urls[rand.Intn(len(urls))], catagory, nil
+}
+
+func ChangeToRandom() error {
+	url, _, err := NewURL(nil, nil)
+	if err != nil {
+		return err
+	}
+	return wp.SetFromURL(url)
 }
 
 // Doesnt preserve order, but is very fast
