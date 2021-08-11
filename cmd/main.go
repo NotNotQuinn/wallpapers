@@ -1,15 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
+	"github.com/notnotquinn/wallpapers/conf"
 	"github.com/notnotquinn/wallpapers/wallpapers"
 	"github.com/urfave/cli/v2"
 )
 
 func main() {
 	app := cli.NewApp()
-	app.Name = "Wallpaper Updater"
+	app.Name = "wallpaper"
 	app.Version = "0.1.1"
 	app.Usage = "Randomize your wallpapers"
 	app.Commands = []*cli.Command{
@@ -20,11 +22,19 @@ func main() {
 				return wallpapers.ChangeToRandom()
 			},
 		},
+		{
+			Name:    "config",
+			Aliases: []string{"conf"},
+			Usage:   "Show the config.",
+			Action: func(c *cli.Context) error {
+				fmt.Println(conf.Get())
+				return nil
+			},
+		},
 	}
 	app.UseShortOptionHandling = true
 
 	// Some things that need to get done:
-	// - SET WALLPAPERS EVERY SO OFTEN AND GET THEM FROM THE INTERNET
 	// - Add ourselves to start on boot. (cross platform may be difficult)
 	// - Some configuration options
 	// - NSFW detection and block toggle.
