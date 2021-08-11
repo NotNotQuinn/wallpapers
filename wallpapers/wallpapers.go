@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"log"
 	"math/rand"
+	"net/http"
 	"time"
 
-	"github.com/notnotquinn/wallpapers/conf"
 	wp "github.com/reujab/wallpaper"
 )
 
@@ -60,6 +61,11 @@ const (
 	Triangular  WallpaperCatagory = "Triangular"
 	VHS_Box_Art WallpaperCatagory = "VHS Box"
 	Games       WallpaperCatagory = "Games"
+)
+
+const (
+	// Gist to look for a JSON file to parse as info.
+	GistId = "6c1acc57b33cdb88b720637d3d4d2af5"
 )
 
 var (
@@ -157,15 +163,34 @@ func must(err error) {
 	}
 }
 
+type gistResponse struct {
+	Files map[string]struct {
+		Language string `json:"language"`
+		Content  string `json:"content"`
+	} `json:"files"`
+}
+
 func init() {
 	// Should be pretty random
 	rand.Seed(int64(time.Now().Local().Hour()*time.Now().Nanosecond() + time.Now().Day()*time.Now().Hour() + time.Now().Second()))
 	go func() {
-		<-conf.FirstLoad()
-		// Load OnlineWallpapers with data from wallpaper data directory.
-		bytes, err := ioutil.ReadFile(conf.Get().WallpaperData)
+		// Load data!
+		resp, err := http.Get("https://api.github.com/gists/" + GistId)
 		must(err)
-		must(json.Unmarshal(bytes, &OnlineWallpapers))
+		bytes, err := ioutil.ReadAll(resp.Body)
+		must(err)
+		var gist gistResponse
+		must(json.Unmarshal(bytes, &gist))
+		var content []byte
+		for _, file := range gist.Files {
+			if file.Language == "JSON" {
+				if content != nil {
+					log.Fatal("Gist " + GistId + " has 2+ JSON files, unable to find proper data.")
+				}
+				content = []byte(file.Content)
+			}
+		}
+		must(json.Unmarshal(content, &OnlineWallpapers))
 		// Wallpaper data is now loaded.
 		close(WallpaperDataIsValid)
 	}()

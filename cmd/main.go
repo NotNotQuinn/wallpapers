@@ -1,44 +1,22 @@
 package main
 
 import (
-	"fmt"
 	"os"
-	"strings"
 
-	"github.com/notnotquinn/wallpapers/conf"
 	"github.com/notnotquinn/wallpapers/wallpapers"
 	wp "github.com/reujab/wallpaper"
 	"github.com/urfave/cli/v2"
 )
 
 func main() {
-	loadConfig := func(c *cli.Context) error {
-		err := conf.SetPath(c.Path("config"))
-		if err != nil && strings.HasSuffix(err.Error(), ": The system cannot find the file specified.") {
-			fmt.Println("This subcommand requires flag \"config\" to be set.")
-			os.Exit(1)
-		}
-		return err
-	}
-
 	app := cli.NewApp()
 	app.Name = "Wallpaper Updater"
-	app.Version = "0.1.0-dev"
+	app.Version = "0.1.0"
 	app.Usage = "Randomize your wallpapers"
-	app.Flags = []cli.Flag{
-		&cli.PathFlag{
-			Name:        "config",
-			Aliases:     []string{"c"},
-			DefaultText: conf.DefaultPath,
-			Usage:       "config file",
-		},
-	}
 	app.Commands = []*cli.Command{
 		{
-			Name:      "random",
-			UsageText: "wallpaper --config /path/to/config.json random",
-			Usage:     "Changes the wallpaper to a random one",
-			Before:    loadConfig,
+			Name:  "random",
+			Usage: "Changes the wallpaper to a random one",
 			Action: func(c *cli.Context) error {
 				return wallpapers.ChangeToRandom()
 			},
