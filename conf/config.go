@@ -6,18 +6,39 @@ import (
 	"log"
 	"os"
 	"path"
+	"path/filepath"
+	"time"
 )
 
 type ConfType struct {
-	ChangeInterval string `json:"changeInterval"`
+	// How often to change the wallpaper
+	ChangeInterval time.Duration `json:"changeInterval"`
+	CacheData      cacheData     `json:"cacheData"`
+}
+
+// Currently cached images
+type cacheData struct {
+	// Directory to store cached images
+	Directory string `json:"directory"`
+	// Full filepaths to files that are currently cached.
+	ImagePaths []string `json:"images"`
 }
 
 var (
-	// Default config when someone starts the application for the first time.
-	DefaultConf = &ConfType{}
 	// The config
 	conf = &ConfType{}
 )
+
+// Default config when someone starts the application for the first time.
+func Defaults() *ConfType {
+	return &ConfType{
+		ChangeInterval: time.Hour * 24,
+		CacheData: cacheData{
+			Directory:  filepath.Join(os.TempDir(), "wallpapers"),
+			ImagePaths: []string{},
+		},
+	}
+}
 
 // Get path to the config file, the path is always to a file that exists, if err != nil
 func (c *ConfType) getConfFile() (string, error) {
@@ -32,7 +53,7 @@ func (c *ConfType) getConfFile() (string, error) {
 		// file exists - do nothing
 	} else if os.IsNotExist(err) {
 		// does not exist - create it with defaults
-		data, err := json.Marshal(DefaultConf)
+		data, err := json.Marshal(Defaults())
 		if err != nil {
 			return "", err
 		}
