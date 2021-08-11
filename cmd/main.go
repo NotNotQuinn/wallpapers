@@ -4,7 +4,6 @@ import (
 	"os"
 
 	"github.com/notnotquinn/wallpapers/wallpapers"
-	wp "github.com/reujab/wallpaper"
 	"github.com/urfave/cli/v2"
 )
 
@@ -45,9 +44,4 @@ func must(err error) {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func init() {
-	// "zooms" into the images until they fill the screen
-	must(wp.SetMode(wp.Crop))
 }

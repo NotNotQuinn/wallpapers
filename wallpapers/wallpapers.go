@@ -171,6 +171,7 @@ type gistResponse struct {
 }
 
 func init() {
+	must(wp.SetMode(wp.Crop))
 	// Should be pretty random
 	rand.Seed(int64(time.Now().Local().Hour()*time.Now().Nanosecond() + time.Now().Day()*time.Now().Hour() + time.Now().Second()))
 	go func() {
