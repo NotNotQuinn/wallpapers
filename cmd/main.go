@@ -1,10 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
-	"github.com/notnotquinn/wallpapers/conf"
 	"github.com/notnotquinn/wallpapers/wallpapers"
 	"github.com/urfave/cli/v2"
 )
@@ -27,7 +25,6 @@ func main() {
 			Aliases: []string{"conf"},
 			Usage:   "Show the config.",
 			Action: func(c *cli.Context) error {
-				fmt.Println(conf.Get())
 				return nil
 			},
 		},
