@@ -20,14 +20,6 @@ func main() {
 				return wallpapers.ChangeToRandom()
 			},
 		},
-		{
-			Name:    "config",
-			Aliases: []string{"conf"},
-			Usage:   "Show the config.",
-			Action: func(c *cli.Context) error {
-				return nil
-			},
-		},
 	}
 	app.UseShortOptionHandling = true
 
