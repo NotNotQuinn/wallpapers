@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/notnotquinn/wallpapers/wallpapers"
@@ -20,13 +21,30 @@ func main() {
 				return wallpapers.ChangeToRandom()
 			},
 		},
+		{
+			Name: "downloadone",
+			Action: func(c *cli.Context) error {
+				url, catagory, err := wallpapers.NewURL(nil, nil)
+				if err != nil {
+					return err
+				}
+				path, _ := wallpapers.CalculatePath(url)
+				fmt.Printf("Downloading: %s\n  %s\n  to %s\n", url, catagory, path)
+				err = wallpapers.AddUrl(url)
+				if err != nil {
+					return err
+				}
+				fmt.Println("done")
+				return nil
+			},
+		},
 	}
 	app.UseShortOptionHandling = true
 
 	// Some things that need to get done:
 	// - Add ourselves to start on boot. (cross platform may be difficult)
-	// - Some configuration options
-	// - NSFW detection and block toggle.
+	// - Some configuration options (i guess??)
+	// - NSFW detection and block toggle. (not needed if users can curate their own lists of images)
 	//   they provide API key to 3rd party service if they want it - no backend
 
 	// Some things that would be nice:

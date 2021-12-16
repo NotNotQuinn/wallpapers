@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"regexp"
 )
 
@@ -65,6 +66,12 @@ func DownloadFile(url, path string) error {
 
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
 		return errors.New("non-200 status code")
+	}
+
+	// create parent directories
+	err = os.MkdirAll(filepath.Dir(path), 0)
+	if err != nil {
+		return err
 	}
 
 	file, err := os.Create(path)

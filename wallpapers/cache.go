@@ -1,7 +1,6 @@
 package wallpapers
 
 import (
-	"io/ioutil"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -34,11 +33,16 @@ func AddFile(Url, originalPath string) error {
 	if err != nil {
 		return err
 	}
-	bytes, err := ioutil.ReadFile(originalPath)
+	bytes, err := os.ReadFile(originalPath)
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(path, bytes, 0)
+	// create parent directories
+	err = os.MkdirAll(filepath.Dir(path), 0)
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(path, bytes, 0)
 	if err != nil {
 		return err
 	}
