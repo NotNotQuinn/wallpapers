@@ -1,8 +1,12 @@
 package wallpapers
 
 import (
+	"errors"
 	"fmt"
+	"io"
+	"net/http"
 	"net/url"
+	"os"
 	"regexp"
 )
 
@@ -39,4 +43,39 @@ func getEyyIndexerFiles(Url string) (urls []string, err error) {
 		urls = append(urls, baseURL+match[1])
 	}
 	return urls, nil
+}
+
+// returns whether the file exists
+func exists(path string) bool {
+	_, err := os.Stat(path)
+	return !errors.Is(err, os.ErrNotExist)
+}
+
+// download a file with HTTP GET and (if code 2xx) set the response as the contents of the path, if path doesnt exist.
+// Otherwise you will get an error
+func DownloadFile(url, path string) error {
+	if exists(path) {
+		return os.ErrExist
+	}
+
+	res, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode < 200 || res.StatusCode >= 300 {
+		return errors.New("non-200 status code")
+	}
+
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+
+	_, err = io.Copy(file, res.Body)
+	if err != nil {
+		return err
+	}
+
+	return file.Close()
 }
