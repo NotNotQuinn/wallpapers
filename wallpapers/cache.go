@@ -4,11 +4,11 @@ import (
 	"io/ioutil"
 	"net/url"
 	"os"
-	"path"
+	"path/filepath"
 )
 
 // Keep It Simple Stupid
-const cacheDir = "d:\\wallpapers"
+const cacheDir = "d:\\wallpapers\\cached"
 
 // type ImgCache struct {
 // 	// Maps url to file path
@@ -57,11 +57,5 @@ func CalculatePath(Url string) (string, error) {
 		return "", err
 	}
 
-	return path.Clean(path.Join(cacheDir, parsed.Hostname()+"/"+parsed.EscapedPath())), nil
-}
-
-func init() {
-	if !path.IsAbs(cacheDir) {
-		panic("cache directory must be an absolute path")
-	}
+	return filepath.Clean(filepath.Join(cacheDir, parsed.Hostname()+"/"+parsed.EscapedPath())), nil
 }

@@ -17,7 +17,14 @@ func TestCalculatePath(t *testing.T) {
 			args: args{
 				Url: "https://five.sh/files/wallpapers/Rain/14105517898360.jpg",
 			},
-			want: "d:\\wallpapers/five.sh/files/wallpapers/Rain/14105517898360.jpg",
+			want: "d:\\wallpapers\\cached\\five.sh\\files\\wallpapers\\Rain\\14105517898360.jpg",
+		},
+		{
+			name: "a funky url",
+			args: args{
+				Url: "https://five.sh/   /14105517898360.jpg",
+			},
+			want: "d:\\wallpapers\\cached\\five.sh\\%20%20%20\\14105517898360.jpg",
 		},
 	}
 	for _, tt := range tests {
