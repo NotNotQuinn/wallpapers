@@ -1,15 +1,8 @@
 package wallpapers
 
 import (
-	"encoding/json"
 	"errors"
-	"io/ioutil"
-	"log"
 	"math/rand"
-	"net/http"
-	"time"
-
-	wp "github.com/reujab/wallpaper"
 )
 
 // A catagory a wallpaper can have
@@ -83,7 +76,7 @@ var (
 //
 // If Include and Exclude have any overlap, the overlapping catagories are not included.
 // By default all catagories are included, however if `len(Include) > 0` then only the specified catagories are used.
-func NewURL(Exclude []WallpaperCatagory, Include []WallpaperCatagory) (string, WallpaperCatagory, error) {
+func NewRandomURL(Exclude []WallpaperCatagory, Include []WallpaperCatagory) (string, WallpaperCatagory, error) {
 	// Caclulate accepted catagories
 	accept := ALL_CATAGORIES
 	if len(Include) > 0 {
@@ -142,12 +135,12 @@ func NewURL(Exclude []WallpaperCatagory, Include []WallpaperCatagory) (string, W
 	return urls[rand.Intn(len(urls))], catagory, nil
 }
 
-func ChangeToRandom() error {
-	url, _, err := NewURL(nil, nil)
+func SetRandom() error {
+	url, _, err := NewRandomURL(nil, nil)
 	if err != nil {
 		return err
 	}
-	return wp.SetFromURL(url)
+	return SetFromURL(url)
 }
 
 // Doesnt preserve order, but is very fast
@@ -168,31 +161,4 @@ type gistResponse struct {
 		Language string `json:"language"`
 		Content  string `json:"content"`
 	} `json:"files"`
-}
-
-func init() {
-	must(wp.SetMode(wp.Crop))
-	// Should be pretty random
-	rand.Seed(int64(time.Now().Local().Hour()*time.Now().Nanosecond() + time.Now().Day()*time.Now().Hour() + time.Now().Second()))
-	go func() {
-		// Load data!
-		resp, err := http.Get("https://api.github.com/gists/" + GistId)
-		must(err)
-		bytes, err := ioutil.ReadAll(resp.Body)
-		must(err)
-		var gist gistResponse
-		must(json.Unmarshal(bytes, &gist))
-		var content []byte
-		for _, file := range gist.Files {
-			if file.Language == "JSON" {
-				if content != nil {
-					log.Fatal("Gist " + GistId + " has 2+ JSON files, unable to find proper data.")
-				}
-				content = []byte(file.Content)
-			}
-		}
-		must(json.Unmarshal(content, &OnlineWallpapers))
-		// Wallpaper data is now loaded.
-		close(WallpaperDataIsValid)
-	}()
 }

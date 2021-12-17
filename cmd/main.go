@@ -18,23 +18,63 @@ func main() {
 			Name:  "random",
 			Usage: "Changes the wallpaper to a random one",
 			Action: func(c *cli.Context) error {
-				return wallpapers.ChangeToRandom()
+				return wallpapers.SetRandom()
 			},
 		},
 		{
-			Name: "downloadone",
+			Name:  "downloadone",
+			Usage: "Downloads a random wallpaper.",
 			Action: func(c *cli.Context) error {
-				url, catagory, err := wallpapers.NewURL(nil, nil)
+				url, catagory, err := wallpapers.NewRandomURL(nil, nil)
 				if err != nil {
 					return err
 				}
 				path, _ := wallpapers.CalculatePath(url)
 				fmt.Printf("Downloading: %s\n  %s\n  to %s\n", url, catagory, path)
-				err = wallpapers.AddUrl(url)
+				_, err = wallpapers.AddUrl(url)
 				if err != nil {
 					return err
 				}
 				fmt.Println("done")
+				return nil
+			},
+		},
+		{
+			Name:  "add",
+			Usage: "Adds the current wallpaper to the named playlist.",
+			Action: func(c *cli.Context) error {
+				// create the playlist if new
+				// and add the current wallpaper to it
+				current, err := wallpapers.CurrentFilePath()
+				if err != nil {
+					return err
+				}
+				playlists, err := wallpapers.LoadPlaylists()
+				if err != nil {
+					return err
+				}
+				(*playlists)[c.Args().First()] = append((*playlists)[c.Args().First()], current)
+				return wallpapers.SavePlaylists()
+			},
+		},
+		{
+			Name:  "list",
+			Usage: "Lists all playlists.",
+			Action: func(c *cli.Context) error {
+				playlists, err := wallpapers.LoadPlaylists()
+				if err != nil {
+					return err
+				}
+				fmt.Println("Listing all playlists:")
+				if len(*playlists) == 0 {
+					fmt.Println("<none>")
+				}
+				for i, list := range *playlists {
+					fmt.Printf("%s:\n", i)
+					for _, v := range list {
+						fmt.Printf("  %s\n", v)
+					}
+				}
 				return nil
 			},
 		},

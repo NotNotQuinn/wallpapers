@@ -7,7 +7,13 @@ import (
 )
 
 // Keep It Simple Stupid
-const cacheDir = "d:\\wallpapers\\cached"
+const wallpaperDir = "d:\\wallpapers\\"
+
+var cacheDir string
+
+func init() {
+	cacheDir = filepath.Join(wallpaperDir, "cached")
+}
 
 // type ImgCache struct {
 // 	// Maps url to file path
@@ -16,15 +22,18 @@ const cacheDir = "d:\\wallpapers\\cached"
 
 // Cache of URLs to paths to downloaded images
 
-// downloads file and saves it
-func AddUrl(Url string) error {
+// downloads file and saves it, returning path if successful
+func AddUrl(Url string) (string, error) {
 	path, err := CalculatePath(Url)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	err = DownloadFile(Url, path)
-	return err
+	if err != nil {
+		return "", err
+	}
+	return path, nil
 }
 
 // saves a file as specific url, but copies the file at `path` rather than downloading
