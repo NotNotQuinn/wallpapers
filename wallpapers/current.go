@@ -22,7 +22,7 @@ func init() {
 }
 
 func SetFromURL(Url string) error {
-	err := os.WriteFile(currentWallpaperFile, []byte(Url), 0)
+	err := os.WriteFile(currentWallpaperFile, []byte(Url), 0644)
 	if err != nil {
 		return err
 	}
@@ -90,7 +90,7 @@ func init() {
 					content = []byte(file.Content)
 				}
 			}
-			os.WriteFile(urlDataPath, content, 0)
+			os.WriteFile(urlDataPath, content, 0644)
 		} else if err != nil {
 			panic(err)
 		} else {

@@ -21,9 +21,9 @@ func init() {
 
 var playlistsLoaded bool = false
 
-func LoadPlaylists() (*mappedPlaylists, error) {
+func LoadPlaylists() (mappedPlaylists, error) {
 	if playlistsLoaded {
-		return &Playlists, nil
+		return Playlists, nil
 	}
 
 	bytes, err := os.ReadFile(playlistsFile)
@@ -45,13 +45,37 @@ func LoadPlaylists() (*mappedPlaylists, error) {
 	}
 
 	playlistsLoaded = true
-	return &Playlists, nil
+	return Playlists, nil
+}
+
+// remove duplicates from playlists, and remove empty playlists
+func SanitizePlaylists() {
+	var tmp = make(mappedPlaylists)
+	for key, list := range Playlists {
+		// filter duplicates
+		var seen = make(map[string]bool)
+		for _, value := range list {
+			seen[value] = true
+		}
+		var tmp2 []string
+		for value := range seen {
+			tmp2 = append(tmp2, value)
+		}
+		list = tmp2
+
+		// remove empty
+		if len(list) != 0 {
+			tmp[key] = list
+		}
+	}
+	Playlists = tmp
 }
 
 func SavePlaylists() error {
+	SanitizePlaylists()
 	bytes, err := json.MarshalIndent(Playlists, "", "\t")
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(playlistsFile, bytes, 0)
+	return os.WriteFile(playlistsFile, bytes, 0644)
 }

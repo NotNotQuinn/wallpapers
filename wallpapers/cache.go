@@ -51,11 +51,11 @@ func AddFile(Url, originalPath string) error {
 		return err
 	}
 	// create parent directories
-	err = os.MkdirAll(filepath.Dir(path), 0)
+	err = os.MkdirAll(filepath.Dir(path), 0644)
 	if err != nil {
 		return err
 	}
-	err = os.WriteFile(path, bytes, 0)
+	err = os.WriteFile(path, bytes, 0644)
 	if err != nil {
 		return err
 	}

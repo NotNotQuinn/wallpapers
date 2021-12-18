@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -40,21 +41,32 @@ func main() {
 			},
 		},
 		{
-			Name:  "add",
-			Usage: "Adds the current wallpaper to the named playlist.",
+			Name:      "add",
+			Usage:     "Adds the current wallpaper to the named playlists.",
+			ArgsUsage: "<playlists1> <playlist2>....",
 			Action: func(c *cli.Context) error {
+				if c.NArg() < 1 {
+					return errors.New("please provide at least one playlist")
+				}
 				// create the playlist if new
 				// and add the current wallpaper to it
 				current, err := wallpapers.CurrentFilePath()
 				if err != nil {
-					return err
+					return fmt.Errorf("failed to get current wallpaper: %w", err)
 				}
 				playlists, err := wallpapers.LoadPlaylists()
 				if err != nil {
-					return err
+					return fmt.Errorf("failed to load playlists: %w", err)
 				}
-				(*playlists)[c.Args().First()] = append((*playlists)[c.Args().First()], current)
-				return wallpapers.SavePlaylists()
+				keys := c.Args().Slice()
+				for _, key := range keys {
+					playlists[key] = append(playlists[key], current)
+				}
+				err = wallpapers.SavePlaylists()
+				if err != nil {
+					return fmt.Errorf("failed to save playlists: %w", err)
+				}
+				return nil
 			},
 		},
 		{
@@ -66,16 +78,85 @@ func main() {
 					return err
 				}
 				fmt.Println("Listing all playlists:")
-				if len(*playlists) == 0 {
+				if len(playlists) == 0 {
 					fmt.Println("<none>")
 				}
-				for i, list := range *playlists {
+				for i, list := range playlists {
 					fmt.Printf("%s:\n", i)
 					for _, v := range list {
 						fmt.Printf("  %s\n", v)
 					}
 				}
 				return nil
+			},
+		},
+		{
+			Name:  "show",
+			Usage: "Shows current wallpaper",
+			Action: func(c *cli.Context) error {
+				fmt.Println("Current wallpaper:")
+				url, err := wallpapers.CurrentURL()
+				if err != nil {
+					return err
+				}
+				path, err := wallpapers.CurrentFilePath()
+				if err != nil {
+					return err
+				}
+				fmt.Printf("  remote: %s\n", url)
+				fmt.Printf("  local: %s\n", path)
+
+				playlists, err := wallpapers.LoadPlaylists()
+				if err != nil {
+					return fmt.Errorf("unable to load playlists: %w", err)
+				}
+				fmt.Println("  playlists:")
+				var isInOnePlaylists bool
+				for name, list := range playlists {
+					for _, fp := range list {
+						if fp == path {
+							if !isInOnePlaylists {
+								fmt.Printf("  ")
+							}
+							fmt.Printf("  %s", name)
+							isInOnePlaylists = true
+						}
+					}
+				}
+				if !isInOnePlaylists {
+					fmt.Println("    <none>")
+				} else {
+					fmt.Println()
+				}
+				return nil
+			},
+		},
+		{
+			Name:      "remove",
+			Aliases:   []string{"rem"},
+			Usage:     "Removes current wallpaper from the named playlist.",
+			ArgsUsage: "<playlist>",
+			Action: func(c *cli.Context) error {
+				keys := c.Args().Slice()
+				playlists, err := wallpapers.LoadPlaylists()
+				if err != nil {
+					return fmt.Errorf("failed to load playlists: %w", err)
+				}
+				file, err := wallpapers.CurrentFilePath()
+				if err != nil {
+					return fmt.Errorf("failed to get current wallpaper: %w", err)
+				}
+				for _, key := range keys {
+					var tmp = make([]string, 0)
+					for _, v := range playlists[key] {
+						if v != file {
+							tmp = append(tmp, v)
+						}
+					}
+					playlists[key] = tmp
+				}
+
+				return wallpapers.SavePlaylists()
 			},
 		},
 	}
