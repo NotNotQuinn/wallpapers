@@ -56,11 +56,6 @@ const (
 	Games       WallpaperCatagory = "Games"
 )
 
-const (
-	// Gist to look for a JSON file to parse as info.
-	GistId = "6c1acc57b33cdb88b720637d3d4d2af5"
-)
-
 var (
 	ALL_CATAGORIES []WallpaperCatagory = []WallpaperCatagory{
 		Ancient, AsiaRussia, Blurry, Calm, Cityscapes, Creepy,
@@ -148,17 +143,4 @@ func SetRandom() error {
 func remove(s []WallpaperCatagory, i int) []WallpaperCatagory {
 	s[i] = s[len(s)-1]
 	return s[:len(s)-1]
-}
-
-func must(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
-type gistResponse struct {
-	Files map[string]struct {
-		Language string `json:"language"`
-		Content  string `json:"content"`
-	} `json:"files"`
 }

@@ -1,6 +1,8 @@
 package wallpapers
 
 import (
+	"errors"
+	"io/fs"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -31,7 +33,9 @@ func AddUrl(Url string) (string, error) {
 
 	err = DownloadFile(Url, path)
 	if err != nil {
-		return "", err
+		if !errors.Is(err, fs.ErrExist) {
+			return "", err
+		}
 	}
 	return path, nil
 }
