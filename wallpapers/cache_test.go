@@ -40,3 +40,41 @@ func TestCalculatePath(t *testing.T) {
 		})
 	}
 }
+func TestCalculateURL(t *testing.T) {
+	type args struct {
+		Path string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "a url",
+			args: args{
+				Path: "d:\\wallpapers\\cached\\five.sh\\files\\wallpapers\\Rain\\14105517898360.jpg",
+			},
+			want: "https://five.sh/files/wallpapers/Rain/14105517898360.jpg",
+		},
+		{
+			name: "a funky url",
+			args: args{
+				Path: "d:\\wallpapers\\cached\\five.sh\\%20%20%20\\14105517898360.jpg",
+			},
+			want: "https://five.sh/%20%20%20/14105517898360.jpg",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := CalculateURL(tt.args.Path)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("CalculateURL() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("CalculateURL() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

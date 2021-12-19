@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // Keep It Simple Stupid
@@ -68,6 +69,20 @@ func ClearCache() error {
 	return os.Remove(cacheDir)
 }
 
+// Calculates the origin URL for the given cache path
+func CalculateURL(Path string) (string, error) {
+	Path = filepath.Clean(Path)
+	if !strings.HasPrefix(Path, cacheDir) {
+		return "", errors.New("path is not within cache directory, unable to determine origin url")
+	}
+	Path = strings.TrimPrefix(Path, cacheDir)
+	// left with something like "\\example.com\\url%20stuff\\thing.jpg" (or using '/' on non-windows systems)
+	Path = strings.Replace(Path, "\\", "/", -1)
+	Path = strings.TrimPrefix(Path, "/")
+	return "https://" + Path, nil
+}
+
+// Calculates the cache path for the given url
 func CalculatePath(Url string) (string, error) {
 	parsed, err := url.Parse(Url)
 	if err != nil {

@@ -3,6 +3,7 @@ package wallpapers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/fs"
 	"io/ioutil"
 	"log"
@@ -21,6 +22,23 @@ func init() {
 	currentWallpaperFile = filepath.Join(wallpaperDir, "current-url.txt")
 }
 
+func SetFromFile(fp string) error {
+	Url, err := CalculateURL(fp)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(currentWallpaperFile, []byte(Url), 0644)
+	if err != nil {
+		return err
+	}
+	err = printWallpaperInfo(Url, fp)
+	if err != nil {
+		return err
+	}
+	return wp.SetFromFile(fp)
+}
+
 func SetFromURL(Url string) error {
 	err := os.WriteFile(currentWallpaperFile, []byte(Url), 0644)
 	if err != nil {
@@ -31,7 +49,56 @@ func SetFromURL(Url string) error {
 	if err != nil {
 		return err
 	}
+
+	err = printWallpaperInfo(Url, path)
+	if err != nil {
+		return err
+	}
 	return wp.SetFromFile(path)
+}
+
+func printWallpaperInfo(url, path string) error {
+	fmt.Println("Current wallpaper:")
+	fmt.Printf("  remote: %s\n", url)
+	fmt.Printf("  local: %s\n", path)
+
+	playlists, err := LoadPlaylists()
+	if err != nil {
+		return fmt.Errorf("unable to load playlists: %w", err)
+	}
+	fmt.Println("  playlists:")
+	var isInOnePlaylists bool
+	for name, list := range playlists {
+		for _, fp := range list {
+			if fp == path {
+				if !isInOnePlaylists {
+					fmt.Printf("  ")
+				}
+				fmt.Printf("  %s", name)
+				isInOnePlaylists = true
+			}
+		}
+	}
+	if !isInOnePlaylists {
+		fmt.Println("    <none>")
+	} else {
+		fmt.Println()
+	}
+	return nil
+
+}
+
+func PrintCurrentWallpaperInfo() error {
+	filepath, err := CurrentFilePath()
+	if err != nil {
+		return fmt.Errorf("unable to determine current wallpaper: %w", err)
+	}
+	url, err := CalculateURL(filepath)
+	if err != nil {
+		return fmt.Errorf("failed to calculate url: %w", err)
+	}
+	err = printWallpaperInfo(url, filepath)
+	return err
 }
 
 func CurrentFilePath() (string, error) {

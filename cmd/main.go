@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"os"
 
 	"github.com/notnotquinn/wallpapers/wallpapers"
@@ -16,10 +17,29 @@ func main() {
 	app.Usage = "Randomize your wallpapers"
 	app.Commands = []*cli.Command{
 		{
-			Name:  "random",
+			Name: "random",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:    "playlist",
+					Aliases: []string{"p"},
+					Usage:   "Select a random wallpaper only from this playlist.",
+				},
+			},
 			Usage: "Changes the wallpaper to a random one",
 			Action: func(c *cli.Context) error {
-				return wallpapers.SetRandom()
+				key := c.String("playlist")
+				if key == "" {
+					return wallpapers.SetRandom()
+				}
+				playlists, err := wallpapers.LoadPlaylists()
+				if err != nil {
+					return fmt.Errorf("failed to load playlists: %w", err)
+				}
+				if playlists[key] == nil {
+					return fmt.Errorf("no such playlist '%s' exists", key)
+				}
+				err = wallpapers.SetFromFile(playlists[key][rand.Intn(len(playlists[key]))])
+				return err
 			},
 		},
 		{
@@ -72,6 +92,12 @@ func main() {
 		{
 			Name:  "list",
 			Usage: "Lists all playlists.",
+			Flags: []cli.Flag{&cli.BoolFlag{
+				Name:     "long",
+				Aliases:  []string{"l"},
+				Usage:    "Output all playlists in full.",
+				Required: false,
+			}},
 			Action: func(c *cli.Context) error {
 				playlists, err := wallpapers.LoadPlaylists()
 				if err != nil {
@@ -82,9 +108,11 @@ func main() {
 					fmt.Println("<none>")
 				}
 				for i, list := range playlists {
-					fmt.Printf("%s:\n", i)
-					for _, v := range list {
-						fmt.Printf("  %s\n", v)
+					fmt.Printf("%s:  %d wallpapers\n", i, len(list))
+					if c.Bool("long") {
+						for _, v := range list {
+							fmt.Printf("  %s\n", v)
+						}
 					}
 				}
 				return nil
@@ -94,41 +122,7 @@ func main() {
 			Name:  "show",
 			Usage: "Shows current wallpaper",
 			Action: func(c *cli.Context) error {
-				fmt.Println("Current wallpaper:")
-				url, err := wallpapers.CurrentURL()
-				if err != nil {
-					return err
-				}
-				path, err := wallpapers.CurrentFilePath()
-				if err != nil {
-					return err
-				}
-				fmt.Printf("  remote: %s\n", url)
-				fmt.Printf("  local: %s\n", path)
-
-				playlists, err := wallpapers.LoadPlaylists()
-				if err != nil {
-					return fmt.Errorf("unable to load playlists: %w", err)
-				}
-				fmt.Println("  playlists:")
-				var isInOnePlaylists bool
-				for name, list := range playlists {
-					for _, fp := range list {
-						if fp == path {
-							if !isInOnePlaylists {
-								fmt.Printf("  ")
-							}
-							fmt.Printf("  %s", name)
-							isInOnePlaylists = true
-						}
-					}
-				}
-				if !isInOnePlaylists {
-					fmt.Println("    <none>")
-				} else {
-					fmt.Println()
-				}
-				return nil
+				return wallpapers.PrintCurrentWallpaperInfo()
 			},
 		},
 		{
