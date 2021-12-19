@@ -71,6 +71,24 @@ func SanitizePlaylists() {
 	Playlists = tmp
 }
 
+// Get the playlists that the file is in.
+func GetPlaylistsByPath(Path string) ([]string, error) {
+	allPlaylists, err := LoadPlaylists()
+	if err != nil {
+		return nil, err
+	}
+	playlists := []string{}
+	for name, list := range allPlaylists {
+		for _, fp := range list {
+			if fp == Path {
+				playlists = append(playlists, name)
+			}
+		}
+	}
+
+	return playlists, nil
+}
+
 func SavePlaylists() error {
 	SanitizePlaylists()
 	bytes, err := json.MarshalIndent(Playlists, "", "\t")

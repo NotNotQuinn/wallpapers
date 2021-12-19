@@ -24,12 +24,21 @@ func main() {
 					Aliases: []string{"p"},
 					Usage:   "Select a random wallpaper only from this playlist.",
 				},
+				&cli.BoolFlag{
+					Name:    "untagged",
+					Aliases: []string{"u"},
+					Usage:   "Only show wallpapers not in any playlist. Ignored if -p used.",
+				},
 			},
 			Usage: "Changes the wallpaper to a random one",
 			Action: func(c *cli.Context) error {
 				key := c.String("playlist")
 				if key == "" {
-					return wallpapers.SetRandom()
+					if c.Bool("untagged") {
+						return wallpapers.SetRandomUntagged()
+					} else {
+						return wallpapers.SetRandom()
+					}
 				}
 				playlists, err := wallpapers.LoadPlaylists()
 				if err != nil {

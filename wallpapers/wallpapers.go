@@ -2,7 +2,9 @@ package wallpapers
 
 import (
 	"errors"
+	"fmt"
 	"math/rand"
+	"time"
 )
 
 // A catagory a wallpaper can have
@@ -136,6 +138,31 @@ func SetRandom() error {
 		return err
 	}
 	return SetFromURL(url)
+}
+
+func SetRandomUntagged() error {
+	maxTries := 5
+	for i := 0; i < maxTries; i++ {
+		url, _, err := NewRandomURL(nil, nil)
+		if err != nil {
+			return err
+		}
+
+		path, err := CalculatePath(url)
+		if err != nil {
+			return err
+		}
+
+		playlists, err := GetPlaylistsByPath(path)
+		if err != nil {
+			return fmt.Errorf("get playlists by path: %w", err)
+		}
+		if len(playlists) == 0 {
+			return SetFromURL(url)
+		}
+		time.Sleep(time.Second / 2)
+	}
+	return fmt.Errorf("unable to get random untagged wallpaper after %d tries", maxTries)
 }
 
 // Doesnt preserve order, but is very fast
