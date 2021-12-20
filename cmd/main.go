@@ -100,27 +100,38 @@ func main() {
 		},
 		{
 			Name:  "list",
-			Usage: "Lists all playlists.",
+			Usage: "Lists all playlists. If provided, only lists specified playlists.",
 			Flags: []cli.Flag{&cli.BoolFlag{
-				Name:     "long",
-				Aliases:  []string{"l"},
+				Name:     "all",
+				Aliases:  []string{"a"},
 				Usage:    "Output all playlists in full.",
 				Required: false,
 			}},
+			ArgsUsage: "[playlists1] [playlist2]....",
 			Action: func(c *cli.Context) error {
 				playlists, err := wallpapers.LoadPlaylists()
 				if err != nil {
 					return err
 				}
-				fmt.Println("Listing all playlists:")
-				if len(playlists) == 0 {
-					fmt.Println("<none>")
-				}
-				for i, list := range playlists {
-					fmt.Printf("%s:  %d wallpapers\n", i, len(list))
-					if c.Bool("long") {
-						for _, v := range list {
-							fmt.Printf("  %s\n", v)
+				if c.NArg() > 0 {
+					for _, key := range c.Args().Slice() {
+						fmt.Printf("%s:  %d wallpapers\n", key, len(playlists[key]))
+						if c.Bool("all") {
+							for _, v := range playlists[key] {
+								fmt.Printf("  %s\n", v)
+							}
+						}
+					}
+				} else {
+					if len(playlists) == 0 {
+						fmt.Println("<none>")
+					}
+					for i, list := range playlists {
+						fmt.Printf("%s:  %d wallpapers\n", i, len(list))
+						if c.Bool("all") {
+							for _, v := range list {
+								fmt.Printf("  %s\n", v)
+							}
 						}
 					}
 				}
@@ -138,8 +149,11 @@ func main() {
 			Name:      "remove",
 			Aliases:   []string{"rem"},
 			Usage:     "Removes current wallpaper from the named playlist.",
-			ArgsUsage: "<playlist>",
+			ArgsUsage: "<playlists1> <playlist2>....",
 			Action: func(c *cli.Context) error {
+				if c.NArg() < 1 {
+					return errors.New("please provide at least one playlist")
+				}
 				keys := c.Args().Slice()
 				playlists, err := wallpapers.LoadPlaylists()
 				if err != nil {
